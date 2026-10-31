@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart SIS - Student Information System</title>
+<style>
+  :root{
+    --crimson:#a3173f; --crimson-dark:#7d0f2e; --bg:#a3173f; --card:#fdfbf8;
+    --ink:#1d1418; --muted:#7a6a70; --line:#e4dbd8; --track:#ece6e4; --ok:#2e7d4f;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Montserrat',system-ui,Segoe UI,Arial,sans-serif;color:var(--ink);min-height:100vh}
+  .hidden{display:none!important}
+  button,input,select{font:inherit}
+  :focus-visible{outline:3px solid #f2b8c6;outline-offset:2px}
+  
+  #auth{min-height:100vh;display:grid;place-items:center;padding:24px;
+    background:radial-gradient(circle at 20% 15%,#b82a52 0,transparent 45%),var(--bg)}
+  .logo {
+  width: 120px;
+  height: auto;
+  display: block;
+    margin: 0 auto 20px auto;
+}
+.auth-card{width:100%;max-width:420px;background:var(--card);border-radius:14px;padding:28px 28px 30px;
+    box-shadow:0 18px 50px rgba(60,0,20,.35)}
+  .brand{text-align:center;margin-bottom:18px}
+  .brand h1{margin:0;font-size:2rem;font-weight:800;color:var(--crimson);letter-spacing:.5px}
+  .brand p{margin:2px 0 0;color:var(--muted);font-size:.9rem}
+  label{display:block;font-weight:600;font-size:.85rem;margin:14px 0 6px}
+  .field{width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--ink)}
+  textarea.field,select.field{border-radius:10px}
+  .row{display:flex;gap:12px;align-items:center}
+  .row .field{flex:1;min-width:0}
+  .btn{background:var(--crimson);color:#fff;border:0;border-radius:999px;padding:11px 22px;font-weight:600;cursor:pointer;
+    box-shadow:0 6px 14px rgba(163,23,63,.3);transition:background .15s,transform .1s}
+  .btn:hover{background:var(--crimson-dark)}
+  .btn:active{transform:translateY(1px)}
+  .divider{border:0;border-top:1px solid var(--line);margin:24px 0 4px}
+  .msg{min-height:1.2em;margin:12px 0 0;font-size:.85rem;text-align:center;color:var(--crimson)}
+  .msg.good{color:var(--ok)}
+
+  #app{background:#f3eeec;min-height:100vh;padding:20px}
+  .topbar{background:var(--crimson);color:#fff;border-radius:10px;padding:14px 22px;display:flex;
+    align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;max-width:1200px;margin:0 auto 20px}
+  .topbar strong{font-size:1.3rem;font-weight:800;letter-spacing:.5px}
+  .topbar span{font-size:.9rem;opacity:.95}
+  .logout{background:#fff;color:var(--crimson);border:0;border-radius:999px;padding:7px 18px;font-weight:600;cursor:pointer}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:1200px;margin:0 auto}
+  @media(max-width:820px){.grid{grid-template-columns:1fr}}
+  .panel{background:var(--card);border-radius:12px;padding:24px;box-shadow:0 4px 18px rgba(80,20,40,.08)}
+  .panel h2{margin:0 0 6px;color:var(--crimson);font-size:1.15rem;font-weight:800;letter-spacing:.3px}
+  .panel .field{border-radius:8px}
+  .panel .btn{margin-top:18px}
+
+  table{width:100%;border-collapse:collapse;margin-top:22px;font-size:.88rem}
+  th{background:#f1ecea;text-align:left;padding:10px 12px;font-weight:600}
+  td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:middle}
+  .quiz-title{font-weight:600}
+  .quiz-meta{color:var(--muted);font-size:.78rem}
+  .done .quiz-title{text-decoration:line-through;color:var(--muted)}
+  .del{background:none;border:0;color:var(--muted);cursor:pointer;font-size:1rem}
+  .del:hover{color:var(--crimson)}
+  input[type=checkbox]{width:18px;height:18px;accent-color:var(--crimson);cursor:pointer}
+  .empty{color:var(--muted);text-align:center;padding:18px 0;font-size:.88rem}
+
+  .progress-list{margin-top:24px;border-top:1px solid var(--line);padding-top:6px}
+  .p-item{margin-top:16px}
+  .p-head{display:flex;justify-content:space-between;font-size:.85rem;font-weight:600;margin-bottom:6px;gap:10px}
+  .p-head small{color:var(--muted);font-weight:400}
+  .bar{height:9px;background:var(--track);border-radius:999px;overflow:hidden}
+  .bar>i{display:block;height:100%;background:var(--crimson);border-radius:999px;transition:width .4s}
+  .p-foot{display:flex;justify-content:space-between;align-items:center;margin-top:4px;font-size:.78rem;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<main id="auth">
+  <section class="auth-card">
+    <div class="brand">
+        <img src="/static/logo.png" alt="SMART SIS logo" class="logo">
+      <h1>SMART SIS</h1>
+      <p>Student Information System</p>
+    </div>
+
+    <form id="loginForm" autocomplete="on">
+      <label for="loginUser">Username</label>
+      <input class="field" id="loginUser" placeholder="Enter your username" required>
+      <label for="loginPass">Password</label>
+      <div class="row">
+        <input class="field" id="loginPass" type="password" placeholder="Enter your password" required>
+        <button class="btn" type="submit">Log In</button>
+      </div>
+    </form>
+
+    <hr class="divider">
+
+    <form id="signupForm" autocomplete="off">
+      <label for="signName">Full Name</label>
+      <input class="field" id="signName" placeholder="Enter your full name" required>
+      <label for="signUser">Username</label>
+      <input class="field" id="signUser" placeholder="Choose a username" required>
+      <label for="signPass">Password</label>
+      <div class="row">
+        <input class="field" id="signPass" type="password" placeholder="Choose a password" minlength="4" required>
+        <button class="btn" type="submit">Sign Up</button>
+      </div>
+    </form>
+    <p class="msg" id="authMsg" role="status"></p>
+  </section>
+</main>
+
+<div id="app" class="hidden">
+  <header class="topbar">
+    <strong>SMART SIS</strong>
+    <span id="welcome">Missing Quizzes &amp; Progress Tracker</span>
+    <button class="logout" id="logoutBtn">Logout</button>
+  </header>
+
+  <div class="grid">
+    <section class="panel">
+      <h2>MISSING QUIZZES</h2>
+      <form id="quizForm">
+        <label for="qSubject">Subject</label>
+        <select class="field" id="qSubject" required></select>
+        <label for="qTitle">Quiz Title</label>
+        <input class="field" id="qTitle" placeholder="e.g. Quiz 3 - Derivatives" required>
+        <label for="qDue">Due Date</label>
+        <input class="field" id="qDue" type="date">
+        <button class="btn" type="submit">Add Quiz</button>
+      </form>
+
+      <table>
+        <thead><tr><th style="width:50%">Pending</th><th>Done quizzes</th></tr></thead>
+        <tbody id="quizBody"></tbody>
+      </table>
+    </section>
+
+    <section class="panel">
+      <h2>PROGRESS TRACKER</h2>
+      <form id="progForm">
+        <label for="pSubject">Subject</label>
+        <select class="field" id="pSubject" required></select>
+        <div class="row">
+          <div style="flex:1">
+            <label for="pDone">Completed Tasks</label>
+            <input class="field" id="pDone" type="number" min="0" value="0" required>
+          </div>
+          <div style="flex:1">
+            <label for="pTotal">Total Tasks</label>
+            <input class="field" id="pTotal" type="number" min="1" value="10" required>
+          </div>
+        </div>
+        <button class="btn" type="submit">Add Progress</button>
+      </form>
+      <div class="progress-list" id="progList"></div>
+    </section>
+  </div>
+</div>
+<script>
+(function () {
+  var SUBJECTS = ["Mathematics","Science","English","Filipino","History","Computer Programming","Physical Education","Other"];
+  function $(id){ return document.getElementById(id); }
+  var store = {
+    get: function(k, d){ try { var v = JSON.parse(localStorage.getItem(k)); return (v === null || v === undefined) ? d : v; } catch (e) { return d; } },
+    set: function(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  };
+
+  var user = store.get("sis_session", null);
+  function dataKey(){ return "sis_data_" + user.username; }
+  var data = { quizzes: [], progress: [] };
+
+  function esc(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  function say(text, good){ var m = $("authMsg"); m.textContent = text; m.className = "msg" + (good ? " good" : ""); }
+
+  $("signupForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    var name = $("signName").value.trim();
+    var username = $("signUser").value.trim().toLowerCase();
+    var password = $("signPass").value;
+    var users = store.get("sis_users", {});
+    if (users[username]) { say("That username is already taken. Try another one."); return; }
+    users[username] = { name: name, password: password };
+    store.set("sis_users", users);
+    e.target.reset();
+    $("loginUser").value = username;
+    $("loginPass").focus();
+    say("Account created. Log in with your new username.", true);
+  });
+
+  $("loginForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    var username = $("loginUser").value.trim().toLowerCase();
+    var password = $("loginPass").value;
+    var u = store.get("sis_users", {})[username];
+    if (!u || u.password !== password) { say("Wrong username or password. Check them or sign up first."); return; }
+    user = { username: username, name: u.name };
+    store.set("sis_session", user);
+    e.target.reset();
+    say("");
+    showApp();
+  });
+
+  $("logoutBtn").addEventListener("click", function(){
+    try { localStorage.removeItem("sis_session"); } catch (e) {}
+    user = null;
+    $("app").classList.add("hidden");
+    $("auth").classList.remove("hidden");
+  });
+
+  function showApp(){
+    data = store.get(dataKey(), { quizzes: [], progress: [] });
+    $("auth").classList.add("hidden");
+    $("app").classList.remove("hidden");
+    $("welcome").textContent = "Missing Quizzes & Progress Tracker - " + user.name;
+    renderQuizzes();
+    renderProgress();
+  }
+  function save(){ store.set(dataKey(), data); }
+
+  ["qSubject", "pSubject"].forEach(function(id){
+    var html = "";
+    SUBJECTS.forEach(function(s){ html += "<option>" + s + "</option>"; });
+    $(id).innerHTML = html;
+  });
+
+  $("quizForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    data.quizzes.push({
+      id: uid(),
+      subject: $("qSubject").value,
+      title: $("qTitle").value.trim(),
+      due: $("qDue").value,
+      done: false
+    });
+    save();
+    e.target.reset();
+    renderQuizzes();
+  });
+
+  function quizCell(q){
+    var due = q.due ? " - due " + esc(q.due) : "";
+    return '<div class="quiz-title">' + esc(q.title) + '</div>' +
+           '<div class="quiz-meta">' + esc(q.subject) + due + '</div>';
+  }
+
+  function pendingCell(q){
+    return '<div class="row">' +
+      '<input type="checkbox" data-toggle="' + q.id + '" aria-label="Mark done">' +
+      '<div style="flex:1">' + quizCell(q) + '</div>' +
+      '<button class="del" data-del="' + q.id + '" aria-label="Delete quiz">&times;</button></div>';
+  }
+
+  function doneCell(q){
+    return '<div class="row done">' +
+      '<input type="checkbox" checked data-toggle="' + q.id + '" aria-label="Mark pending">' +
+      '<div style="flex:1">' + quizCell(q) + '</div>' +
+      '<button class="del" data-del="' + q.id + '" aria-label="Delete quiz">&times;</button></div>';
+  }
+
+  function renderQuizzes(){
+    var body = $("quizBody");
+    if (!data.quizzes.length){
+      body.innerHTML = '<tr><td colspan="2" class="empty">No missing quizzes yet. Add one above.</td></tr>';
+      return;
+    }
+    var pending = data.quizzes.filter(function(q){ return !q.done; });
+    var done = data.quizzes.filter(function(q){ return q.done; });
+    var rows = Math.max(pending.length, done.length);
+    var html = "";
+    for (var i = 0; i < rows; i++){
+      html += "<tr><td>" + (pending[i] ? pendingCell(pending[i]) : "") + "</td>" +
+              "<td>" + (done[i] ? doneCell(done[i]) : "") + "</td></tr>";
+    }
+    body.innerHTML = html;
+  }
+
+  $("quizBody").addEventListener("click", function(e){
+    var t = e.target;
+    if (t.dataset.toggle){
+      var q = data.quizzes.find(function(x){ return x.id === t.dataset.toggle; });
+      if (q) q.done = !q.done;
+    } else if (t.dataset.del){
+      data.quizzes = data.quizzes.filter(function(x){ return x.id !== t.dataset.del; });
+    } else { return; }
+    save();
+    renderQuizzes();
+  });
+
+  $("progForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    var done = Math.max(0, parseInt($("pDone").value, 10) || 0);
+    var total = Math.max(1, parseInt($("pTotal").value, 10) || 1);
+    data.progress.push({ id: uid(), subject: $("pSubject").value, done: Math.min(done, total), total: total });
+    save();
+    renderProgress();
+  });
+
+  function renderProgress(){
+    var list = $("progList");
+    if (!data.progress.length){
+      list.innerHTML = '<div class="empty">No progress yet. Add a subject above.</div>';
+      return;
+    }
+    var html = "";
+    data.progress.forEach(function(p){
+      var pct = Math.round(p.done / p.total * 100);
+      html += '<div class="p-item">' +
+        '<div class="p-head"><span>' + esc(p.subject) + ' <small>' + p.done + ' of ' + p.total + ' tasks</small></span><span>' + pct + '%</span></div>' +
+        '<div class="bar"><i style="width:' + pct + '%"></i></div>' +
+        '<div class="p-foot"><span>' +
+        '<button class="del" data-minus="' + p.id + '" aria-label="Remove one task">&minus;</button> ' +
+        '<button class="del" data-plus="' + p.id + '" aria-label="Add one task">+</button></span>' +
+        '<button class="del" data-pdel="' + p.id + '" aria-label="Delete progress">&times;</button></div>' +
+        '</div>';
+    });
+    list.innerHTML = html;
+  }
+
+  $("progList").addEventListener("click", function(e){
+    var t = e.target;
+    if (t.dataset.pdel){
+      data.progress = data.progress.filter(function(x){ return x.id !== t.dataset.pdel; });
+    } else if (t.dataset.plus || t.dataset.minus){
+      var id = t.dataset.plus || t.dataset.minus;
+      var p = data.progress.find(function(x){ return x.id === id; });
+      if (p) p.done = Math.min(p.total, Math.max(0, p.done + (t.dataset.plus ? 1 : -1)));
+    } else { return; }
+    save();
+    renderProgress();
+  });
+
+  if (user && store.get("sis_users", {})[user.username]) showApp();
+})();
+</script>
+</body>
+</html>
