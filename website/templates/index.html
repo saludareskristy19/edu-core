@@ -155,7 +155,22 @@
         <button class="btn" type="submit">Add Progress</button>
       </form>
       <div class="progress-list" id="progList"></div>
-    </section>
+    </section> 
+    <section class="panel">
+      <h2>FINAL GRADES</h2>
+      <form id="gradeForm">
+        <label for="gSubject">Subject</label>
+        <select class="field" id="Subject" required></select>
+        <label for="gValue">Final Grade</label>
+        <input class="field" id="gValue" type="number" min="0" max="100" value="0" required>
+        <button class="btn" type="submit">Add Grade</button>
+  </form>
+  <table>
+        <thead><tr><th style="width:50%">Subject</th><th>Final Grade</th></tr></thead>
+        <tbody id="gradeBody"></tbody>
+  </table> 
+   <p>General Average: <span id="generalAverage">0</span></p>
+</section>
   </div>
 </div>
 <script>
@@ -169,7 +184,7 @@
 
   var user = store.get("sis_session", null);
   function dataKey(){ return "sis_data_" + user.username; }
-  var data = { quizzes: [], progress: [] };
+  var data = { quizzes: [], progress: [], grades: [] };
 
   function esc(s){
     return String(s).replace(/[&<>"']/g, function(c){
@@ -215,7 +230,8 @@
   });
 
   function showApp(){
-    data = store.get(dataKey(), { quizzes: [], progress: [] });
+    data = store.get(dataKey(), { quizzes: [], progress: [], grades: [] });
+    if (!data.grades) data.grades = [];
     $("auth").classList.add("hidden");
     $("app").classList.remove("hidden");
     $("welcome").textContent = "Missing Quizzes & Progress Tracker - " + user.name;
@@ -224,11 +240,49 @@
   }
   function save(){ store.set(dataKey(), data); }
 
-  ["qSubject", "pSubject"].forEach(function(id){
+  ["qSubject", "pSubject", "gSubject"].forEach(function(id){
     var html = "";
     SUBJECTS.forEach(function(s){ html += "<option>" + s + "</option>"; });
     $(id).innerHTML = html;
   });
+  function renderGrades() {
+    if (!data.grades) data.grades = [];
+    $("gradeBody").innerHTML = data.grades.map(function (g) {
+      return "<tr><td>" + esc(g.subject) + "</td><td>" + esc(g.grade) + "</td></tr>";
+    }).join("");
+    $("generalAverage").textContent = data.grades.length
+      ? (data.grades.reduce(function (s, g) { return s + g.grade; }, 0) / data.grades.length).toFixed(2)
+      : "0";
+  }
+
+  $("gradeForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var subject = $("gSubject").value;
+    var grade = parseFloat($("gValue").value);
+    if (!data.grades) data.grades = [];
+    data.grades = data.grades.filter(function (g) { return g.subject !== subject; });
+    data.grades.push({ subject: subject, grade: grade });
+    save();
+    renderGrades();
+    e.target.reset();
+  });
+  
+    function renderQuizzes(){
+    var body = $("quizBody");
+    if (!data.quizzes.length){
+      body.innerHTML = '<tr><td colspan="2" class="empty">No missing quizzes yet. Add one above.</td></tr>';
+      return;
+    }
+    var pending = data.quizzes.filter(function(q){ return !q.done; });
+    var done = data.quizzes.filter(function(q){ return q.done; });
+    var rows = Math.max(pending.length, done.length);
+    var html = "";
+    for (var i = 0; i < rows; i++){
+      html += "<tr><td>" + (pending[i] ? pendingCell(pending[i]) : "") + "</td>" +
+              "<td>" + (done[i] ? doneCell(done[i]) : "") + "</td></tr>";
+    }
+    body.innerHTML = html;
+  }
 
   $("quizForm").addEventListener("submit", function(e){
     e.preventDefault();
