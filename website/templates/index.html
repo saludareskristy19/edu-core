@@ -18,7 +18,7 @@
 <!-- ================= LOGIN + SIGN UP ================= -->
 <main class="auth">
   <header>
-    <img src="{{ url_for('static', filename='logo.jpg') }}" alt="EDU CORE logo">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="EDU CORE logo">
     <h1>EDU CORE</h1>
     <p class="sub">Student Information System</p>
   </header>
@@ -54,7 +54,10 @@
 <!-- ================= STUDENT DASHBOARD ================= -->
 <div class="wrap">
   <header class="top">
-    <h1>EDU CORE</h1>
+    <div class="brand">
+  <img src="{{ url_for('static', filename='logo.png') }}" alt="Group logo">
+  <h1>EDU CORE</h1>
+</div>
     <span>Missing Quizzes &amp; Progress Tracker - {{ user.username }}</span>
     <a class="btn logout" href="{{ url_for('logout') }}">Logout</a>
   </header>
@@ -181,7 +184,10 @@
 <!-- ================= TEACHER / ADMIN: ONE STUDENT'S RECORDS ================= -->
 <div class="wrap">
   <header class="top">
-    <h1>EDU CORE</h1>
+    <div class="brand">
+  <img src="{{ url_for('static', filename='logo.png') }}" alt="EDU CORE logo">
+  <h1>EDU CORE</h1>
+</div>
     <span>{{ student.name }} ({{ student.username }})</span>
     <a class="btn logout" href="{{ url_for('staff') }}">Back to students</a>
   </header>
@@ -282,8 +288,11 @@
 <!-- ================= TEACHER / ADMIN: STUDENT LIST (+ ADMIN TOOLS) ================= -->
 <div class="wrap">
   <header class="top">
-    <h1>EDU CORE</h1>
-    <span>{{ user.role|capitalize }} - {{ user.username }}</span>
+  <div class="brand">
+  <img src="{{ url_for('static', filename='logo.png') }}" alt="EDU CORE logo">
+  <h1>EDU CORE</h1>
+</div>
+<span>{{ user.role|capitalize }} - {{ user.username }}</span>
     <a class="btn logout" href="{{ url_for('logout') }}">Logout</a>
   </header>
 
